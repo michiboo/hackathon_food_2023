@@ -10,6 +10,6 @@ sleep 5
 
 # Start the Flask application container
 docker build -t backendapp .
-docker run -d --name my-flask-app -p 5000:5000 -t backendapp
+docker run -d --name my-flask-app -n host -t backendapp
 
 echo "Application and database containers started successfully."

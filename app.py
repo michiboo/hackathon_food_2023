@@ -15,15 +15,14 @@ class Restaurant(db.Model):
 class Menu(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
-    
-class Emission(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
     emission_value = db.Column(db.Float, nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    
+class Consumption(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     menu_id = db.Column(db.Integer, db.ForeignKey('menu.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    date = db.Clolum(db.Date, nullable=False)
+    date = db.Column(db.Date, nullable=False)
 
 class Municipality(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,8 +36,7 @@ class User(db.Model):
     emissions = db.relationship('Emission', backref='user', lazy=True)
 
 
-# @app.route('/emission/<userid>', methods=['GET'])
-# def get_emission(userid):
+
 #     data = 
 # emission_data = [
 #     {
@@ -49,6 +47,35 @@ class User(db.Model):
 #         'date': '2023-05-30'
 #     }
 # ]
+
+@app.route('/consumption/<userid>', methods=['GET'])
+def get_previous_menu(userid):
+    menu_data = Consumption.query.filter_by(user_id=userid).all()
+    output = []
+    for menu in menu_data:
+        menu_data = {}
+        menu_data['menu_id'] = menu.menu_id
+        menu_data['user_id'] = menu.user_id
+        menu_data['date'] = menu.date
+        output.append(menu_data)
+    return jsonify({'menu_data': output})    
+
+@app.route('/consumption', methods=['POST'])
+def add_consumption():
+    data = request.get_json()
+    menu_id = data['menu_id']
+    user_id = data['user_id']
+    date = data['date']
+    new_consumption = Consumption(menu_id=menu_id, user_id=user_id, date=date)
+    db.session.add(new_consumption)
+    db.session.commit()
+
+    return jsonify({'message': 'Consumption added successfully'})
+    
+
+@app.route('/emission', methods=['POST'])
+def add_emission():
+    pass
 
 
 @app.route("/", methods=["GET"])
@@ -78,4 +105,4 @@ def login():
     return jsonify({'message': 'Login successful'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
