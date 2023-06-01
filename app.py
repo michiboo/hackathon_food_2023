@@ -75,7 +75,17 @@ def add_consumption():
 
 @app.route('/emission', methods=['POST'])
 def add_emission():
-    pass
+    data = request.get_json()
+    userid = data['userid']
+    restaurant_id = data['restaurant_id']
+    meal_name = data['meal_name']
+    emission_value = data['emission_value']
+    date = data['date']
+    new_emission = Consumption(userid=userid, restaurant_id=restaurant_id, meal_name=meal_name, emission_value=emission_value, date=date)
+    db.session.add(new_emission)
+    db.session.commit()
+
+    return jsonify({'message': 'Emission added successfully'})
 
 
 @app.route("/", methods=["GET"])
